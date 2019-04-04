@@ -1,4 +1,4 @@
-const cards = [
+const cardsData = [
   {
     type: "spade",
     number: "1",
@@ -313,4 +313,4 @@ const cards = [
   }
 ];
 
-export default cards;
+export default cardsData;

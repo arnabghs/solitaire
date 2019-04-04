@@ -1,5 +1,6 @@
 .card,
-.red-card {
+.red-card,
+.black-card {
   font-size: 150px;
 }
 .red-card {
