@@ -1,9 +1,9 @@
 class Card {
-  constructor(type,number,unicode,color) {
-		this.type = type;
-		this.number = number;
-		this.unicode = unicode;
-		this.color = color;
+  constructor(data) {
+		this.type = data.type;
+		this.number = data.number;
+		this.unicode = data.unicode;
+		this.color = data.color;
 		this.cls = `${this.color}-card`;
 	}
 }

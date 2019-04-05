@@ -38,6 +38,9 @@ header {
   align-items: center;
   justify-content: center;
 }
+.back-card {
+  color: #3e3ea5;
+}
 .red-card {
   color: #f00;
 }
