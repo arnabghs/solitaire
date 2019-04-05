@@ -51,7 +51,6 @@ class Game extends React.Component {
 
     const lastCardsInTable = this.state.tableau.map(x => _.last(x));
     const index = _.findIndex(lastCardsInTable, x => _.isEqual(x, card));
-
     const modifiedTableauDeck = _.dropRight(this.state.tableau[index]);
     const modifiedTableau = this.state.tableau.slice();
     modifiedTableau[index] = modifiedTableauDeck;

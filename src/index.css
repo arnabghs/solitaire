@@ -33,10 +33,14 @@ header {
 .red-card,
 .black-card {
   font-size: 200px;
-  background-color: #fff;
+  height: 190px;
+  width: 140px;
+  background-color: #f5f5f5;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 15px;
+  box-shadow: -2px 7px 8px 0px rgba(0,0,0,0.4);
 }
 .back-card {
   color: #3e3ea5;
@@ -74,18 +78,17 @@ header {
   align-items: center;
 }
 .tableau-area {
-  width: 80%;
+  width: 90%;
   height: 100%;
   display: flex;
   justify-content: space-around;
   align-items: center;
 }
 .tableau-pile {
-  width: 12%;
   height: 90%;
   display: grid;
   justify-content: center;
-  grid-template-rows: repeat(10, 1fr);
+  grid-template-rows: repeat(8, 1fr);
 }
 div:nth-child(1) {
   grid-column: 1;

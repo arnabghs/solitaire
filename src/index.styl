@@ -41,15 +41,20 @@ header {
 
 .card {
 	font-size: 200px;
-	background-color: white;
+	height: 190px;
+	width: 140px;
+	background-color: whitesmoke;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	// border: 1px solid blue;
+	border-radius: 15px;
+	box-shadow: -2px 7px 8px 0px rgba(0, 0, 0, 0.4);
 }
 
 .back-card {
 	@extend .card;
-		color:rgb(62, 62, 165);
+	color: rgb(62, 62, 165);
 }
 
 .red-card {
@@ -97,7 +102,7 @@ header {
 }
 
 .tableau-area {
-	width: 80%;
+	width: 90%;
 	height: 100%;
 	display: flex;
 	justify-content: space-around;
@@ -105,12 +110,10 @@ header {
 }
 
 .tableau-pile {
-	// solid-black-border(1px);
-	width: 12%;
 	height: 90%;
 	display: grid;
 	justify-content: center;
-	grid-template-rows: repeat(10, 1fr);
+	grid-template-rows: repeat(8, 1fr);
 	// grid-gap: 5px;
 	// grid-auto-columns: 100px;
 }
