@@ -4,7 +4,7 @@ class Card {
 		this.number = number;
 		this.unicode = unicode;
 		this.color = color;
-		this.class = `${this.color}-card`;
+		this.cls = `${this.color}-card`;
 	}
 }
 

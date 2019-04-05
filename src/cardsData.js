@@ -310,6 +310,12 @@ const cardsData = [
     number: "13",
     color: "red",
     unicode: "\u{1F0BE}"
+  },
+  {
+    type: "BackOfCard",
+    number: "53",
+    color: "back",
+    unicode: "\u{1F0A0}"
   }
 ];
 
