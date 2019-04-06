@@ -26,13 +26,21 @@ class Game extends React.Component {
         heart: [cards[39]]
       },
       tableau: [
-        [cards[5]],
-        [BACKCARD, cards[15]],
-        [BACKCARD, BACKCARD, cards[25]],
-        [BACKCARD, BACKCARD, BACKCARD, cards[35]],
-        [BACKCARD, BACKCARD, BACKCARD, BACKCARD, cards[45]],
-        [BACKCARD, BACKCARD, BACKCARD, BACKCARD, BACKCARD, cards[50]],
-        [BACKCARD, BACKCARD, BACKCARD, BACKCARD, BACKCARD, BACKCARD, cards[4]]
+        [cards[50]],
+        [cards[11], cards[12]],
+        [cards[21], cards[22], cards[23]],
+        [cards[31], cards[32], cards[33], cards[34]],
+        [cards[41], cards[42], cards[43], cards[44], cards[45]],
+        [cards[1], cards[2], cards[3], cards[4], cards[5], cards[6]],
+        [
+          cards[19],
+          cards[29],
+          cards[39],
+          cards[49],
+          cards[9],
+          cards[14],
+          cards[24]
+        ]
       ]
     };
     this.moveTableauToFoundation = this.moveTableauToFoundation.bind(this);
@@ -137,20 +145,26 @@ function Foundation(props) {
 }
 
 function TableauPile(props) {
-  let key = 0;
+	let key = 0;
+	let uni = BACKCARD.unicode;
+  let cls = BACKCARD.cls;
   let isDraggable = false;
   function showCard(cards) {
     const cardDivs = [];
     cards.map((card, index) => {
-      if (index === cards.length - 1) isDraggable = true;
+      if (index === cards.length - 1) {
+        isDraggable = true;
+				cls = card.cls;
+				uni = card.unicode;
+      }
       return cardDivs.push(
         <div
           key={key++}
-          className={card.cls}
+          className={cls}
           draggable={isDraggable}
           onDragStart={setDataOnDrag.bind(null, JSON.stringify(card))}
         >
-          {card.unicode}
+          {uni}
         </div>
       );
     });
