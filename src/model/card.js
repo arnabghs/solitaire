@@ -5,6 +5,7 @@ class Card {
 		this.unicode = data.unicode;
 		this.color = data.color;
 		this.cls = `${this.color}-card`;
+		this.open = false;
 	}
 }
 

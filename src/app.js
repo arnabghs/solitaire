@@ -3,15 +3,16 @@ import cards from "./model/cards";
 import Card from "./model/card";
 const _ = require("lodash");
 
-const setDataOnDrag = function(card, event) {
-  event.dataTransfer.setData("text", card);
+const setDataOnDrag = function(card, fromPlace, event) {
+  let data = JSON.stringify({ cardData: card, fromPlace });
+  event.dataTransfer.setData("text", data);
 };
 
 const allowDrop = function(event) {
   event.preventDefault();
 };
 
-const BACKCARD = cards[52];
+const BACKCARD = _.last(cards);
 
 class Game extends React.Component {
   constructor(props) {
@@ -46,15 +47,16 @@ class Game extends React.Component {
     this.moveTableauToFoundation = this.moveTableauToFoundation.bind(this);
     this.onStockClicked = this.onStockClicked.bind(this);
     this.refillStock = this.refillStock.bind(this);
+    this.moveToTableau = this.moveToTableau.bind(this);
+    this.moveFromWasteToTableau = this.moveFromWasteToTableau.bind(this);
   }
 
   refillStock() {
-		this.setState({
-			stock: this.state.waste.slice().reverse(),
-			waste: [],
-
-		})
-	}
+    this.setState({
+      stock: this.state.waste.slice().reverse(),
+      waste: []
+    });
+  }
 
   onStockClicked() {
     if (_.isEmpty(this.state.stock)) {
@@ -69,9 +71,50 @@ class Game extends React.Component {
       waste: modifiedWaste
     });
   }
+
+  moveFromWasteToTableau(card, pileIndex) {
+    let modifiedTableauDeck = this.state.tableau[pileIndex].concat(card);
+    const modifiedTableau = this.state.tableau.slice();
+    modifiedTableau[pileIndex] = modifiedTableauDeck;
+
+    const modifiedWaste = _.dropRight(this.state.waste);
+
+    this.setState({
+      tableau: modifiedTableau,
+      waste: modifiedWaste
+    });
+  }
+
+  moveToTableau(index, event) {
+    event.preventDefault();
+    const { cardData, fromPlace } = JSON.parse(
+      event.dataTransfer.getData("text")
+    );
+
+    const card = new Card(cardData);
+
+    if (fromPlace === "waste") {
+      this.moveFromWasteToTableau(card, index);
+      return;
+    }
+
+    // if (fromPlace == "tableau") {
+    //   moveFromTableauToTableau();
+    //   return;
+    // }
+
+    // if (fromPlace === "foundation") {
+    //   moveFromFoundationToTableau();
+    //   return;
+    // }
+  }
+
   moveTableauToFoundation(event) {
     event.preventDefault();
-    const cardData = JSON.parse(event.dataTransfer.getData("text"));
+    const { cardData, fromPlace } = JSON.parse(
+      event.dataTransfer.getData("text")
+    );
+
     const card = new Card(cardData);
     const modifiedFoundationDeck = this.state.foundations[card.type].concat(
       card
@@ -81,7 +124,12 @@ class Game extends React.Component {
     });
 
     const lastCardsInTable = this.state.tableau.map(x => _.last(x));
-    const index = _.findIndex(lastCardsInTable, x => _.isEqual(x, card));
+    const index = _.findIndex(lastCardsInTable, x =>
+      _.isEqualWith(x, card, (objVal, othVal, key) =>
+        key === "open" ? true : undefined
+      )
+    );
+
     const modifiedTableauDeck = _.dropRight(this.state.tableau[index]);
     const modifiedTableau = this.state.tableau.slice();
     modifiedTableau[index] = modifiedTableauDeck;
@@ -105,7 +153,7 @@ class Game extends React.Component {
               />
             </div>
             <div className={"lower-part"}>
-              <Tableau cards={this.state.tableau} />
+              <Tableau cards={this.state.tableau} drop={this.moveToTableau} />
             </div>
           </div>
         </div>
@@ -133,7 +181,7 @@ const CardDiv = function(props) {
     <div
       className={props.card.cls}
       draggable={"true"}
-      onDragStart={setDataOnDrag.bind(null, JSON.stringify(props.card))}
+      onDragStart={setDataOnDrag.bind(null, props.card, "waste")}
     >
       {props.card.unicode}
     </div>
@@ -141,9 +189,9 @@ const CardDiv = function(props) {
 };
 
 function Waste(props) {
-	const topCard = _.last(props.cards);
-	let card = <CardDiv card={topCard} />;
-	if (!topCard) card = null;
+  const topCard = _.last(props.cards);
+  let card = <CardDiv card={topCard} />;
+  if (!topCard) card = null;
   return <div className={"waste-cards-area"}>{card}</div>;
 }
 
@@ -170,7 +218,7 @@ function Foundation(props) {
       <div
         className={card.cls}
         draggable={"true"}
-        onDragStart={setDataOnDrag.bind(null, JSON.stringify(card))}
+        onDragStart={setDataOnDrag.bind(null, card, "foundation")}
       >
         {card.unicode}
       </div>
@@ -183,11 +231,20 @@ function TableauPile(props) {
   let uni = BACKCARD.unicode;
   let cls = BACKCARD.cls;
   let isDraggable = false;
+  let dropMethod = null;
+  let onDragOverMethod = null;
+
   function showCard(cards) {
     const cardDivs = [];
     cards.map((card, index) => {
       if (index === cards.length - 1) {
         isDraggable = true;
+        card.open = true;
+        dropMethod = props.drop;
+        onDragOverMethod = allowDrop;
+      }
+
+      if (card.open) {
         cls = card.cls;
         uni = card.unicode;
       }
@@ -196,7 +253,9 @@ function TableauPile(props) {
           key={key++}
           className={cls}
           draggable={isDraggable}
-          onDragStart={setDataOnDrag.bind(null, JSON.stringify(card))}
+          onDragStart={setDataOnDrag.bind(null, card, "tableau")}
+          onDrop={dropMethod}
+          onDragOver={onDragOverMethod}
         >
           {uni}
         </div>
@@ -213,7 +272,13 @@ function Tableau(props) {
   function createTableauPiles(cards) {
     let piles = [];
     for (let index = 0; index < 7; index++) {
-      piles.push(<TableauPile key={index} cards={cards[index]} />);
+      piles.push(
+        <TableauPile
+          key={index}
+          cards={cards[index]}
+          drop={props.drop.bind(null, index)}
+        />
+      );
     }
     return piles;
   }

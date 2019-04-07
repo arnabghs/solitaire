@@ -48,8 +48,14 @@ header {
 .red-card {
   color: #f00;
 }
+.red-card:hover {
+  cursor: grab;
+}
 .black-card {
   color: #000;
+}
+.black-card:hover {
+  cursor: grab;
 }
 .stock-pile {
   width: 14%;
