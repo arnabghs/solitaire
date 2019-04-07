@@ -44,7 +44,7 @@ class Game extends React.Component {
         ]
       ]
     };
-    this.moveTableauToFoundation = this.moveTableauToFoundation.bind(this);
+    this.moveToFoundation = this.moveToFoundation.bind(this);
     this.onStockClicked = this.onStockClicked.bind(this);
     this.refillStock = this.refillStock.bind(this);
     this.moveToTableau = this.moveToTableau.bind(this);
@@ -109,32 +109,42 @@ class Game extends React.Component {
     // }
   }
 
-  moveTableauToFoundation(event) {
+  moveToFoundation(event) {
     event.preventDefault();
     const { cardData, fromPlace } = JSON.parse(
       event.dataTransfer.getData("text")
     );
 
     const card = new Card(cardData);
-    const modifiedFoundationDeck = this.state.foundations[card.type].concat(
-      card
-    );
-    const newFoundations = Object.assign({}, this.state.foundations, {
-      [card.type]: modifiedFoundationDeck
+    let modifiedTableau = this.state.tableau.slice();
+    let modifiedWaste = this.state.waste.slice();
+
+    if (fromPlace === "tableau") {
+      const lastCardsInTable = this.state.tableau.map(x => _.last(x));
+      const index = _.findIndex(lastCardsInTable, x =>
+        _.isEqualWith(x, card, (objVal, othVal, key) =>
+          key === "open" ? true : undefined
+        )
+      );
+
+      const modifiedTableauDeck = _.dropRight(this.state.tableau[index]);
+      modifiedTableau[index] = modifiedTableauDeck;
+    }
+
+    if (fromPlace === "waste") {
+      modifiedWaste = _.dropRight(modifiedWaste);
+    }
+
+    const modifiedDeck = this.state.foundations[card.type].concat(card);
+    const modifiedFoundations = Object.assign({}, this.state.foundations, {
+      [card.type]: modifiedDeck
     });
 
-    const lastCardsInTable = this.state.tableau.map(x => _.last(x));
-    const index = _.findIndex(lastCardsInTable, x =>
-      _.isEqualWith(x, card, (objVal, othVal, key) =>
-        key === "open" ? true : undefined
-      )
-    );
-
-    const modifiedTableauDeck = _.dropRight(this.state.tableau[index]);
-    const modifiedTableau = this.state.tableau.slice();
-    modifiedTableau[index] = modifiedTableauDeck;
-
-    this.setState({ foundations: newFoundations, tableau: modifiedTableau });
+    this.setState({
+      foundations: modifiedFoundations,
+      tableau: modifiedTableau,
+      waste: modifiedWaste
+    });
   }
 
   render() {
@@ -149,7 +159,7 @@ class Game extends React.Component {
               <Waste cards={this.state.waste} />
               <Foundations
                 cards={this.state.foundations}
-                drop={this.moveTableauToFoundation}
+                drop={this.moveToFoundation}
               />
             </div>
             <div className={"lower-part"}>
