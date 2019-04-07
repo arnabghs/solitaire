@@ -52,6 +52,7 @@ class Game extends React.Component {
     this.moveFromFoundationToTableau = this.moveFromFoundationToTableau.bind(
       this
     );
+    this.moveFromTableauToTableau = this.moveFromTableauToTableau.bind(this);
   }
 
   refillStock() {
@@ -104,6 +105,25 @@ class Game extends React.Component {
     });
   }
 
+  moveFromTableauToTableau(card, pileIndex) {
+    const insertedTableauDeck = this.state.tableau[pileIndex].concat(card);
+    const modifiedTableau = this.state.tableau.slice();
+    modifiedTableau[pileIndex] = insertedTableauDeck;
+
+    //
+    const lastCardsInTable = this.state.tableau.map(x => _.last(x));
+    const index = _.findIndex(lastCardsInTable, x =>
+      _.isEqualWith(x, card, (objVal, othVal, key) =>
+        key === "open" ? true : undefined
+      )
+    );
+
+    const withdrawnTableauDeck = _.dropRight(modifiedTableau[index]);
+    modifiedTableau[index] = withdrawnTableauDeck;
+
+    this.setState({ tableau: modifiedTableau });
+  }
+
   moveToTableau(index, event) {
     event.preventDefault();
     const { cardData, fromPlace } = JSON.parse(
@@ -117,10 +137,10 @@ class Game extends React.Component {
       return;
     }
 
-    // if (fromPlace == "tableau") {
-    //   moveFromTableauToTableau();
-    //   return;
-    // }
+    if (fromPlace === "tableau") {
+      this.moveFromTableauToTableau(card, index);
+      return;
+    }
 
     if (fromPlace === "foundation") {
       this.moveFromFoundationToTableau(card, index);
