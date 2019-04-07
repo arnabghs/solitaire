@@ -49,6 +49,9 @@ class Game extends React.Component {
     this.refillStock = this.refillStock.bind(this);
     this.moveToTableau = this.moveToTableau.bind(this);
     this.moveFromWasteToTableau = this.moveFromWasteToTableau.bind(this);
+    this.moveFromFoundationToTableau = this.moveFromFoundationToTableau.bind(
+      this
+    );
   }
 
   refillStock() {
@@ -85,6 +88,22 @@ class Game extends React.Component {
     });
   }
 
+  moveFromFoundationToTableau(card, pileIndex) {
+    let modifiedTableauDeck = this.state.tableau[pileIndex].concat(card);
+    const modifiedTableau = this.state.tableau.slice();
+    modifiedTableau[pileIndex] = modifiedTableauDeck;
+
+    const modifiedDeck = _.dropRight(this.state.foundations[card.type]);
+    const modifiedFoundations = Object.assign({}, this.state.foundations, {
+      [card.type]: modifiedDeck
+    });
+
+    this.setState({
+      tableau: modifiedTableau,
+      foundations: modifiedFoundations
+    });
+  }
+
   moveToTableau(index, event) {
     event.preventDefault();
     const { cardData, fromPlace } = JSON.parse(
@@ -103,10 +122,10 @@ class Game extends React.Component {
     //   return;
     // }
 
-    // if (fromPlace === "foundation") {
-    //   moveFromFoundationToTableau();
-    //   return;
-    // }
+    if (fromPlace === "foundation") {
+      this.moveFromFoundationToTableau(card, index);
+      return;
+    }
   }
 
   moveToFoundation(event) {
@@ -186,21 +205,9 @@ function Stock(props) {
   );
 }
 
-const CardDiv = function(props) {
-  return (
-    <div
-      className={props.card.cls}
-      draggable={"true"}
-      onDragStart={setDataOnDrag.bind(null, props.card, "waste")}
-    >
-      {props.card.unicode}
-    </div>
-  );
-};
-
 function Waste(props) {
   const topCard = _.last(props.cards);
-  let card = <CardDiv card={topCard} />;
+  let card = <CardDiv card={topCard} from={"waste"} />;
   if (!topCard) card = null;
   return <div className={"waste-cards-area"}>{card}</div>;
 }
@@ -217,21 +224,29 @@ function Foundations(props) {
   );
 }
 
+const CardDiv = function(props) {
+  return (
+    <div
+      className={props.card.cls}
+      draggable={"true"}
+      onDragStart={setDataOnDrag.bind(null, props.card, props.from)}
+    >
+      {props.card.unicode}
+    </div>
+  );
+};
+
 function Foundation(props) {
-  let card = _.last(props.cards);
+  let topCard = _.last(props.cards);
+  let card = <CardDiv card={topCard} from={"foundation"} />;
+  if (!topCard) card = null;
   return (
     <div
       className={"foundation-box"}
       onDrop={props.drop}
       onDragOver={allowDrop}
     >
-      <div
-        className={card.cls}
-        draggable={"true"}
-        onDragStart={setDataOnDrag.bind(null, card, "foundation")}
-      >
-        {card.unicode}
-      </div>
+      {card}
     </div>
   );
 }
