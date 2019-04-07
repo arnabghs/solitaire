@@ -44,8 +44,31 @@ class Game extends React.Component {
       ]
     };
     this.moveTableauToFoundation = this.moveTableauToFoundation.bind(this);
+    this.onStockClicked = this.onStockClicked.bind(this);
+    this.refillStock = this.refillStock.bind(this);
   }
 
+  refillStock() {
+		this.setState({
+			stock: this.state.waste.slice().reverse(),
+			waste: [],
+
+		})
+	}
+
+  onStockClicked() {
+    if (_.isEmpty(this.state.stock)) {
+      this.refillStock();
+      return;
+    }
+    const topStockCard = _.last(this.state.stock);
+    const modifiedWaste = this.state.waste.concat(topStockCard);
+
+    this.setState({
+      stock: _.dropRight(this.state.stock),
+      waste: modifiedWaste
+    });
+  }
   moveTableauToFoundation(event) {
     event.preventDefault();
     const cardData = JSON.parse(event.dataTransfer.getData("text"));
@@ -74,7 +97,7 @@ class Game extends React.Component {
           <div className={"sidebar"} />
           <div className="board">
             <div className={"upper-part"}>
-              <Stock cards={this.state.stock} />
+              <Stock cards={this.state.stock} onClick={this.onStockClicked} />
               <Waste cards={this.state.waste} />
               <Foundations
                 cards={this.state.foundations}
@@ -92,10 +115,15 @@ class Game extends React.Component {
 }
 
 function Stock(props) {
-  // const lastCard = _.last(props.cards);
+  let faceDownImg = BACKCARD.unicode;
+  if (props.cards.length === 0) {
+    faceDownImg = <img src={"./refresh_icon.png"} alt="refresh" />;
+  }
   return (
     <div className={"stock-pile"}>
-      <span className={"back-card"}>{BACKCARD.unicode}</span>
+      <span className={"back-card"} onClick={props.onClick}>
+        {faceDownImg}
+      </span>
     </div>
   );
 }
@@ -113,8 +141,10 @@ const CardDiv = function(props) {
 };
 
 function Waste(props) {
-  const topCard = _.last(props.cards);
-  return <div className={"waste-cards-area"}>{<CardDiv card={topCard} />}</div>;
+	const topCard = _.last(props.cards);
+	let card = <CardDiv card={topCard} />;
+	if (!topCard) card = null;
+  return <div className={"waste-cards-area"}>{card}</div>;
 }
 
 function Foundations(props) {
@@ -136,17 +166,21 @@ function Foundation(props) {
       className={"foundation-box"}
       onDrop={props.drop}
       onDragOver={allowDrop}
-      draggable={"true"}
-      onDragStart={setDataOnDrag.bind(null, JSON.stringify(card))}
     >
-      <div className={card.cls}>{card.unicode}</div>
+      <div
+        className={card.cls}
+        draggable={"true"}
+        onDragStart={setDataOnDrag.bind(null, JSON.stringify(card))}
+      >
+        {card.unicode}
+      </div>
     </div>
   );
 }
 
 function TableauPile(props) {
-	let key = 0;
-	let uni = BACKCARD.unicode;
+  let key = 0;
+  let uni = BACKCARD.unicode;
   let cls = BACKCARD.cls;
   let isDraggable = false;
   function showCard(cards) {
@@ -154,8 +188,8 @@ function TableauPile(props) {
     cards.map((card, index) => {
       if (index === cards.length - 1) {
         isDraggable = true;
-				cls = card.cls;
-				uni = card.unicode;
+        cls = card.cls;
+        uni = card.unicode;
       }
       return cardDivs.push(
         <div

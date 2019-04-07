@@ -52,16 +52,19 @@ header {
   color: #000;
 }
 .stock-pile {
-  width: 12%;
+  width: 14%;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.stock-pile:hover {
+  cursor: pointer;
 }
 .waste-cards-area {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 12%;
+  width: 14%;
 }
 .foundation-area {
   width: 60%;
@@ -136,4 +139,8 @@ div:nth-child(7) {
   width: 100%;
   display: flex;
   justify-content: center;
+}
+.refresh-img {
+  height: 50px;
+  width: 50px;
 }
