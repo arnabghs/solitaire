@@ -281,6 +281,17 @@ const CardDiv = function(props) {
   );
 };
 
+const EmptyCardHolder = function(props) {
+  const onDragOverMethod = props.onDrop ? allowDrop : null;
+  return (
+    <div
+      className={"base-card-holder"}
+      onDrop={props.onDrop}
+      onDragOver={onDragOverMethod}
+    />
+  );
+};
+
 function Foundation(props) {
   let topCard = _.last(props.cards);
   let card = null;
@@ -303,29 +314,16 @@ function TableauPile(props) {
   let key = 0;
 
   const showCard = function(cards) {
-    const isLastCard = function(card) {
-      return _.isEqual(_.last(cards), card);
-    };
+    if (_.isEmpty(cards)) return <EmptyCardHolder onDrop={props.drop} />;
 
     const allCardsinDiv = [];
     cards.map(card => {
-      card.open = isLastCard(card) ? true : card.open;
-      const dropMethod = isLastCard(card) ? props.drop : null;
-
+      card.open = _.isEqual(_.last(cards), card) ? true : card.open;
+      const dropMethod = _.isEqual(_.last(cards), card) ? props.drop : null;
       return allCardsinDiv.push(
-        <CardDiv card={card} from={"tableau"} onDrop={dropMethod} />
+        <CardDiv key={key++} card={card} from={"tableau"} onDrop={dropMethod} />
       );
     });
-
-    if (_.isEmpty(cards))
-      allCardsinDiv.push(
-        <div
-          key={key++}
-          className={"base-card-holder"}
-          onDrop={props.drop}
-          onDragOver={allowDrop}
-        />
-      );
     return allCardsinDiv;
   };
 
