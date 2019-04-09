@@ -75,8 +75,8 @@ class Game extends React.Component {
     });
   }
 
-  updateInsertedDeck(card, pileIndex) {
-    const insertedTableauDeck = this.state.tableau[pileIndex].concat(card);
+  updateInsertedDeck(cards, pileIndex) {
+    const insertedTableauDeck = this.state.tableau[pileIndex].concat(cards);
     const modifiedTableau = this.state.tableau.slice();
     modifiedTableau[pileIndex] = insertedTableauDeck;
     return modifiedTableau;
@@ -109,18 +109,28 @@ class Game extends React.Component {
     return key === "open" ? true : undefined;
   }
 
+  doesContain(deck, card) {
+    return deck.some(c => _.isEqualWith(c, card, this.ignoreOpenCondition));
+  }
+
   getSenderDecksIndex(card) {
-    const lastCardsInTable = this.state.tableau.map(x => _.last(x));
-    return _.findIndex(lastCardsInTable, x =>
-      _.isEqualWith(x, card, this.ignoreOpenCondition)
-    );
+    const tableauDecks = this.state.tableau.slice();
+    const deck = tableauDecks.filter(deck => this.doesContain(deck, card));
+    return _.findIndex(tableauDecks, d => _.isEqual(d, _.head(deck)));
   }
 
   moveFromTableauToTableau(card, pileIndex) {
-    const modifiedTableau = this.updateInsertedDeck(card, pileIndex);
     const index = this.getSenderDecksIndex(card);
-    const withdrawnTableauDeck = _.dropRight(modifiedTableau[index]);
-    modifiedTableau[index] = withdrawnTableauDeck;
+    const cardIndex = _.findIndex(this.state.tableau[index], x =>
+      _.isEqualWith(x, card, this.ignoreOpenCondition)
+    );
+
+    const numberOfCards = this.state.tableau[index].length - cardIndex;
+    const cards = _.takeRight(this.state.tableau[index], numberOfCards);
+    const modifiedTableau = this.updateInsertedDeck(cards, pileIndex);
+
+    const withdrawnDeck = _.dropRight(modifiedTableau[index], numberOfCards);
+    modifiedTableau[index] = withdrawnDeck;
 
     this.setState({ tableau: modifiedTableau });
   }
@@ -290,7 +300,7 @@ function TableauPile(props) {
       card.open = isLastCard(card) ? true : card.open;
       const onDragOverMethod = isLastCard(card) ? allowDrop : null;
       const dropMethod = isLastCard(card) ? props.drop : null;
-      const isDraggable = isLastCard(card) ? true : false;
+      const isDraggable = card.open ? true : false;
       const unicode = card.open ? card.unicode : BACKCARD.unicode;
       const cls = card.open ? card.cls : BACKCARD.cls;
 
