@@ -68,19 +68,22 @@ class Game extends React.Component {
       return;
     }
     const topStockCard = _.last(this.state.stock);
-    const modifiedWaste = this.state.waste.concat(topStockCard);
 
     this.setState({
       stock: _.dropRight(this.state.stock),
-      waste: modifiedWaste
+      waste: this.state.waste.concat(topStockCard)
     });
   }
 
-  moveFromWasteToTableau(card, pileIndex) {
-    let modifiedTableauDeck = this.state.tableau[pileIndex].concat(card);
+  updateInsertedDeck(card, pileIndex) {
+    const insertedTableauDeck = this.state.tableau[pileIndex].concat(card);
     const modifiedTableau = this.state.tableau.slice();
-    modifiedTableau[pileIndex] = modifiedTableauDeck;
+    modifiedTableau[pileIndex] = insertedTableauDeck;
+    return modifiedTableau;
+  }
 
+  moveFromWasteToTableau(card, pileIndex) {
+    const modifiedTableau = this.updateInsertedDeck(card, pileIndex);
     const modifiedWaste = _.dropRight(this.state.waste);
 
     this.setState({
@@ -90,10 +93,7 @@ class Game extends React.Component {
   }
 
   moveFromFoundationToTableau(card, pileIndex) {
-    let modifiedTableauDeck = this.state.tableau[pileIndex].concat(card);
-    const modifiedTableau = this.state.tableau.slice();
-    modifiedTableau[pileIndex] = modifiedTableauDeck;
-
+    const modifiedTableau = this.updateInsertedDeck(card, pileIndex);
     const modifiedDeck = _.dropRight(this.state.foundations[card.type]);
     const modifiedFoundations = Object.assign({}, this.state.foundations, {
       [card.type]: modifiedDeck
@@ -105,19 +105,20 @@ class Game extends React.Component {
     });
   }
 
-  moveFromTableauToTableau(card, pileIndex) {
-    const insertedTableauDeck = this.state.tableau[pileIndex].concat(card);
-    const modifiedTableau = this.state.tableau.slice();
-    modifiedTableau[pileIndex] = insertedTableauDeck;
+  ignoreOpenCondition(objVal, othVal, key) {
+    return key === "open" ? true : undefined;
+  }
 
-    //
+  getSenderDecksIndex(card) {
     const lastCardsInTable = this.state.tableau.map(x => _.last(x));
-    const index = _.findIndex(lastCardsInTable, x =>
-      _.isEqualWith(x, card, (objVal, othVal, key) =>
-        key === "open" ? true : undefined
-      )
+    return _.findIndex(lastCardsInTable, x =>
+      _.isEqualWith(x, card, this.ignoreOpenCondition)
     );
+  }
 
+  moveFromTableauToTableau(card, pileIndex) {
+    const modifiedTableau = this.updateInsertedDeck(card, pileIndex);
+    const index = this.getSenderDecksIndex(card);
     const withdrawnTableauDeck = _.dropRight(modifiedTableau[index]);
     modifiedTableau[index] = withdrawnTableauDeck;
 
@@ -126,64 +127,69 @@ class Game extends React.Component {
 
   moveToTableau(index, event) {
     event.preventDefault();
-    const { cardData, fromPlace } = JSON.parse(
-      event.dataTransfer.getData("text")
-    );
+    const receivedData = JSON.parse(event.dataTransfer.getData("text"));
 
-    const card = new Card(cardData);
+    const card = new Card(receivedData.cardData);
 
-    if (fromPlace === "waste") {
+    if (receivedData.fromPlace === "waste") {
       this.moveFromWasteToTableau(card, index);
       return;
     }
 
-    if (fromPlace === "tableau") {
+    if (receivedData.fromPlace === "tableau") {
       this.moveFromTableauToTableau(card, index);
       return;
     }
 
-    if (fromPlace === "foundation") {
+    if (receivedData.fromPlace === "foundation") {
       this.moveFromFoundationToTableau(card, index);
       return;
     }
   }
 
-  moveToFoundation(event) {
-    event.preventDefault();
-    const { cardData, fromPlace } = JSON.parse(
-      event.dataTransfer.getData("text")
-    );
-
-    const card = new Card(cardData);
-    let modifiedTableau = this.state.tableau.slice();
-    let modifiedWaste = this.state.waste.slice();
-
-    if (fromPlace === "tableau") {
-      const lastCardsInTable = this.state.tableau.map(x => _.last(x));
-      const index = _.findIndex(lastCardsInTable, x =>
-        _.isEqualWith(x, card, (objVal, othVal, key) =>
-          key === "open" ? true : undefined
-        )
-      );
-
-      const modifiedTableauDeck = _.dropRight(this.state.tableau[index]);
-      modifiedTableau[index] = modifiedTableauDeck;
-    }
-
-    if (fromPlace === "waste") {
-      modifiedWaste = _.dropRight(modifiedWaste);
-    }
-
+  getModifiedFoundationAfterInsertion(card) {
     const modifiedDeck = this.state.foundations[card.type].concat(card);
-    const modifiedFoundations = Object.assign({}, this.state.foundations, {
+    return Object.assign({}, this.state.foundations, {
       [card.type]: modifiedDeck
     });
+  }
 
+  moveFromTableauToFoundation(card) {
+    let modifiedTableau = this.state.tableau.slice();
+    const index = this.getSenderDecksIndex(card);
+    const modifiedTableauDeck = _.dropRight(this.state.tableau[index]);
+    modifiedTableau[index] = modifiedTableauDeck;
+    const modifiedFoundation = this.getModifiedFoundationAfterInsertion(card);
     this.setState({
-      foundations: modifiedFoundations,
-      tableau: modifiedTableau,
+      foundations: modifiedFoundation,
+      tableau: modifiedTableau
+    });
+  }
+
+  moveFromWasteToFoundation(card) {
+    let modifiedWaste = this.state.waste.slice();
+    modifiedWaste = _.dropRight(modifiedWaste);
+    const modifiedFoundation = this.getModifiedFoundationAfterInsertion(card);
+    this.setState({
+      foundations: modifiedFoundation,
       waste: modifiedWaste
     });
+  }
+
+  moveToFoundation(event) {
+    event.preventDefault();
+    const receivedData = JSON.parse(event.dataTransfer.getData("text"));
+    const card = new Card(receivedData.cardData);
+
+    if (receivedData.fromPlace === "tableau") {
+      this.moveFromTableauToFoundation(card);
+      return;
+    }
+
+    if (receivedData.fromPlace === "waste") {
+      this.moveFromWasteToFoundation(card);
+      return;
+    }
   }
 
   render() {
