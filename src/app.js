@@ -18,8 +18,8 @@ class Game extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      stock: [cards[13], cards[17], cards[33], cards[47]],
-      waste: [cards[23], cards[37]],
+      stock: [cards[7], cards[2], cards[3], cards[4]],
+      waste: [cards[5], cards[6]],
       foundations: {
         spade: [cards[0]],
         club: [cards[13]],
@@ -27,20 +27,20 @@ class Game extends React.Component {
         heart: [cards[39]]
       },
       tableau: [
-        [cards[50]],
-        [cards[11], cards[12]],
-        [cards[21], cards[22], cards[23]],
-        [cards[31], cards[32], cards[33], cards[34]],
-        [cards[41], cards[42], cards[43], cards[44], cards[45]],
-        [cards[1], cards[2], cards[3], cards[4], cards[5], cards[6]],
+        [cards[11]],
+        [cards[12], cards[50]],
+        [cards[14], cards[15], cards[16]],
+        [cards[17], cards[18], cards[19], cards[20]],
+        [cards[21], cards[22], cards[23], cards[24], cards[25]],
+        [cards[49], cards[27], cards[28], cards[29], cards[30], cards[31]],
         [
-          cards[19],
-          cards[29],
-          cards[39],
-          cards[49],
-          cards[9],
-          cards[14],
-          cards[24]
+          cards[32],
+          cards[33],
+          cards[34],
+          cards[35],
+          cards[37],
+          cards[38],
+          cards[48]
         ]
       ]
     };
@@ -243,8 +243,11 @@ function Stock(props) {
 
 function Waste(props) {
   const topCard = _.last(props.cards);
-  let card = <CardDiv card={topCard} from={"waste"} />;
-  if (!topCard) card = null;
+  let card = null;
+  if (topCard) {
+    topCard.open = true;
+    card = <CardDiv card={topCard} from={"waste"} onDrop={null} />;
+  }
   return <div className={"waste-cards-area"}>{card}</div>;
 }
 
@@ -261,21 +264,30 @@ function Foundations(props) {
 }
 
 const CardDiv = function(props) {
+  const draggable = props.card.open ? true : false;
+  const cls = props.card.open ? props.card.cls : BACKCARD.cls;
+  const unicode = props.card.open ? props.card.unicode : BACKCARD.unicode;
+  const onDragOverMethod = props.onDrop ? allowDrop : null;
   return (
     <div
-      className={props.card.cls}
-      draggable={"true"}
+      className={cls}
+      draggable={draggable}
       onDragStart={setDataOnDrag.bind(null, props.card, props.from)}
+      onDrop={props.onDrop}
+      onDragOver={onDragOverMethod}
     >
-      {props.card.unicode}
+      {unicode}
     </div>
   );
 };
 
 function Foundation(props) {
   let topCard = _.last(props.cards);
-  let card = <CardDiv card={topCard} from={"foundation"} />;
-  if (!topCard) card = null;
+  let card = null;
+  if (topCard) {
+    topCard.open = true;
+    card = <CardDiv card={topCard} from={"foundation"} onDrop={null} />;
+  }
   return (
     <div
       className={"foundation-box"}
@@ -295,31 +307,18 @@ function TableauPile(props) {
       return _.isEqual(_.last(cards), card);
     };
 
-    const cardDivs = [];
+    const allCardsinDiv = [];
     cards.map(card => {
       card.open = isLastCard(card) ? true : card.open;
-      const onDragOverMethod = isLastCard(card) ? allowDrop : null;
       const dropMethod = isLastCard(card) ? props.drop : null;
-      const isDraggable = card.open ? true : false;
-      const unicode = card.open ? card.unicode : BACKCARD.unicode;
-      const cls = card.open ? card.cls : BACKCARD.cls;
 
-      return cardDivs.push(
-        <div
-          key={key++}
-          className={cls}
-          draggable={isDraggable}
-          onDragStart={setDataOnDrag.bind(null, card, "tableau")}
-          onDrop={dropMethod}
-          onDragOver={onDragOverMethod}
-        >
-          {unicode}
-        </div>
+      return allCardsinDiv.push(
+        <CardDiv card={card} from={"tableau"} onDrop={dropMethod} />
       );
     });
 
     if (_.isEmpty(cards))
-      cardDivs.push(
+      allCardsinDiv.push(
         <div
           key={key++}
           className={"base-card-holder"}
@@ -327,7 +326,7 @@ function TableauPile(props) {
           onDragOver={allowDrop}
         />
       );
-    return cardDivs;
+    return allCardsinDiv;
   };
 
   return <div className={"tableau-pile"}>{showCard(props.cards)}</div>;
