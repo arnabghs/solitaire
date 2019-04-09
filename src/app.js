@@ -279,26 +279,21 @@ function Foundation(props) {
 
 function TableauPile(props) {
   let key = 0;
-  let uni = BACKCARD.unicode;
-  let cls = BACKCARD.cls;
-  let isDraggable = false;
-  let dropMethod = null;
-  let onDragOverMethod = null;
 
-  function showCard(cards) {
+  const showCard = function(cards) {
+    const isLastCard = function(card) {
+      return _.isEqual(_.last(cards), card);
+    };
+
     const cardDivs = [];
-    cards.map((card, index) => {
-      if (index === cards.length - 1) {
-        isDraggable = true;
-        card.open = true;
-        dropMethod = props.drop;
-        onDragOverMethod = allowDrop;
-      }
+    cards.map(card => {
+      card.open = isLastCard(card) ? true : card.open;
+      const onDragOverMethod = isLastCard(card) ? allowDrop : null;
+      const dropMethod = isLastCard(card) ? props.drop : null;
+      const isDraggable = isLastCard(card) ? true : false;
+      const unicode = card.open ? card.unicode : BACKCARD.unicode;
+      const cls = card.open ? card.cls : BACKCARD.cls;
 
-      if (card.open) {
-        cls = card.cls;
-        uni = card.unicode;
-      }
       return cardDivs.push(
         <div
           key={key++}
@@ -308,7 +303,7 @@ function TableauPile(props) {
           onDrop={dropMethod}
           onDragOver={onDragOverMethod}
         >
-          {uni}
+          {unicode}
         </div>
       );
     });
@@ -323,7 +318,7 @@ function TableauPile(props) {
         />
       );
     return cardDivs;
-  }
+  };
 
   return <div className={"tableau-pile"}>{showCard(props.cards)}</div>;
 }
