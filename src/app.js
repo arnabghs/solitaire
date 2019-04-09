@@ -306,6 +306,16 @@ function TableauPile(props) {
         </div>
       );
     });
+
+    if (_.isEmpty(cards))
+      cardDivs.push(
+        <div
+          key={key++}
+          className={"base-card-holder"}
+          onDrop={props.drop}
+          onDragOver={allowDrop}
+        />
+      );
     return cardDivs;
   }
 
