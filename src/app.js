@@ -18,31 +18,68 @@ class Game extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      stock: [cards[7], cards[2], cards[3], cards[4]],
-      waste: [cards[5], cards[6]],
+      stock: [cards[51]],
+      waste: [],
       foundations: {
-        spade: [cards[0]],
-        club: [cards[13]],
-        diamond: [cards[26]],
-        heart: [cards[39]]
-      },
-      tableau: [
-        [cards[1]],
-        [cards[12], cards[28]],
-        [cards[14], cards[15], cards[16]],
-        [cards[17], cards[25], cards[19], cards[30]],
-        [cards[21], cards[22], cards[23], cards[24], cards[18]],
-        [cards[49], cards[27], cards[11], cards[29], cards[48], cards[32]],
-        [
+        spade: [
+          cards[0],
+          cards[1],
+          cards[2],
+          cards[3],
+          cards[4],
+          cards[5],
+          cards[6],
+          cards[7],
+          cards[8],
+          cards[9],
+          cards[10],
+          cards[11]
+        ],
+        club: [
+          cards[13],
+          cards[14],
+          cards[15],
+          cards[16],
+          cards[17],
+          cards[18],
+          cards[19],
+          cards[20],
+          cards[21],
+          cards[22],
+          cards[23],
+          cards[24]
+        ],
+        diamond: [
+          cards[26],
+          cards[27],
+          cards[28],
+          cards[29],
+          cards[30],
           cards[31],
+          cards[32],
           cards[33],
           cards[34],
           cards[35],
-          cards[37],
-          cards[38],
-          cards[20]
+          cards[36],
+          cards[37]
+        ],
+        heart: [
+          cards[39],
+          cards[40],
+          cards[41],
+          cards[42],
+          cards[43],
+          cards[44],
+          cards[45],
+          cards[46],
+          cards[47],
+          cards[48],
+          cards[49],
+          cards[50]
         ]
-      ]
+      },
+      tableau: [[], [cards[12]], [cards[25]], [], [cards[38]], [], []],
+      winMsg: ""
     };
     this.moveToFoundation = this.moveToFoundation.bind(this);
     this.onStockClicked = this.onStockClicked.bind(this);
@@ -180,20 +217,26 @@ class Game extends React.Component {
     const modifiedTableauDeck = _.dropRight(this.state.tableau[index]);
     modifiedTableau[index] = modifiedTableauDeck;
     const modifiedFoundation = this.getModifiedFoundationAfterInsertion(card);
-    this.setState({
-      foundations: modifiedFoundation,
-      tableau: modifiedTableau
-    });
+    this.setState(
+      {
+        foundations: modifiedFoundation,
+        tableau: modifiedTableau
+      },
+      this.checkWinningStatus
+    );
   }
 
   moveFromWasteToFoundation(card) {
     let modifiedWaste = this.state.waste.slice();
     modifiedWaste = _.dropRight(modifiedWaste);
     const modifiedFoundation = this.getModifiedFoundationAfterInsertion(card);
-    this.setState({
-      foundations: modifiedFoundation,
-      waste: modifiedWaste
-    });
+    this.setState(
+      {
+        foundations: modifiedFoundation,
+        waste: modifiedWaste
+      },
+      this.checkWinningStatus
+    );
   }
 
   isDropAllowedAtFoundation(card) {
@@ -210,13 +253,26 @@ class Game extends React.Component {
 
     if (receivedData.fromPlace === "tableau") {
       this.moveFromTableauToFoundation(card);
-      return;
     }
 
     if (receivedData.fromPlace === "waste") {
       this.moveFromWasteToFoundation(card);
-      return;
     }
+  }
+
+  checkWinningStatus() {
+    if (this.hasWon()) this.finishGame();
+  }
+
+  hasWon() {
+    const piles = Object.values(this.state.foundations);
+    return piles.every(deck => deck.length === 13);
+  }
+
+  finishGame() {
+    this.setState({
+      winMsg: <div>Congrats you Won!</div>
+    });
   }
 
   render() {
@@ -224,7 +280,7 @@ class Game extends React.Component {
       <section>
         <header />
         <div className={"main"}>
-          <div className={"sidebar"} />
+          <div className={"sidebar"}>{this.state.winMsg}</div>
           <div className="board">
             <div className={"upper-part"}>
               <Stock cards={this.state.stock} onClick={this.onStockClicked} />
