@@ -27,20 +27,20 @@ class Game extends React.Component {
         heart: [cards[39]]
       },
       tableau: [
-        [cards[11]],
-        [cards[12], cards[50]],
+        [cards[1]],
+        [cards[12], cards[28]],
         [cards[14], cards[15], cards[16]],
-        [cards[17], cards[18], cards[19], cards[20]],
-        [cards[21], cards[22], cards[23], cards[24], cards[25]],
-        [cards[49], cards[27], cards[28], cards[29], cards[30], cards[31]],
+        [cards[17], cards[25], cards[19], cards[30]],
+        [cards[21], cards[22], cards[23], cards[24], cards[18]],
+        [cards[49], cards[27], cards[11], cards[29], cards[48], cards[32]],
         [
-          cards[32],
+          cards[31],
           cards[33],
           cards[34],
           cards[35],
           cards[37],
           cards[38],
-          cards[48]
+          cards[20]
         ]
       ]
     };
@@ -135,11 +135,21 @@ class Game extends React.Component {
     this.setState({ tableau: modifiedTableau });
   }
 
+  isDropAllowedAtTableau(card, index) {
+    if (_.isEmpty(this.state.tableau[index])) return card.number === "13";
+
+    const lastCard = _.last(this.state.tableau[index]);
+    const isColorDifferent = lastCard.color !== card.color;
+    const isNextCard = parseInt(lastCard.number) - 1 === parseInt(card.number);
+    return isNextCard && isColorDifferent;
+  }
+
   moveToTableau(index, event) {
     event.preventDefault();
     const receivedData = JSON.parse(event.dataTransfer.getData("text"));
-
     const card = new Card(receivedData.cardData);
+
+    if (!this.isDropAllowedAtTableau(card, index)) return;
 
     if (receivedData.fromPlace === "waste") {
       this.moveFromWasteToTableau(card, index);
@@ -186,9 +196,9 @@ class Game extends React.Component {
     });
   }
 
-  isDropAllowed(card) {
+  isDropAllowedAtFoundation(card) {
     const lastCard = _.last(this.state.foundations[card.type]);
-    return  parseInt(lastCard.number) + 1 === parseInt(card.number);
+    return parseInt(lastCard.number) + 1 === parseInt(card.number);
   }
 
   moveToFoundation(event) {
@@ -196,7 +206,7 @@ class Game extends React.Component {
     const receivedData = JSON.parse(event.dataTransfer.getData("text"));
     const card = new Card(receivedData.cardData);
 
-    if (!this.isDropAllowed(card)) return;
+    if (!this.isDropAllowedAtFoundation(card)) return;
 
     if (receivedData.fromPlace === "tableau") {
       this.moveFromTableauToFoundation(card);
