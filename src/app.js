@@ -186,10 +186,17 @@ class Game extends React.Component {
     });
   }
 
+  isDropAllowed(card) {
+    const lastCard = _.last(this.state.foundations[card.type]);
+    return  parseInt(lastCard.number) + 1 === parseInt(card.number);
+  }
+
   moveToFoundation(event) {
     event.preventDefault();
     const receivedData = JSON.parse(event.dataTransfer.getData("text"));
     const card = new Card(receivedData.cardData);
+
+    if (!this.isDropAllowed(card)) return;
 
     if (receivedData.fromPlace === "tableau") {
       this.moveFromTableauToFoundation(card);
