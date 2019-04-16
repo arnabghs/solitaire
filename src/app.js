@@ -13,82 +13,21 @@ const allowDrop = function(event) {
 };
 
 const BACKCARD = _.last(cards);
+const playingCards = _.dropRight(cards);
+const shuffeledCards = _.shuffle(playingCards);
 
 class Game extends React.Component {
   constructor(props) {
-		super(props);
-		// this.state = {
-		// 	stock:getStockForNewGame(),
-		// 	waste : [],
-		// 	foundations:{spade:[], club:[], diamond:[], heart:[]},
-		// 	tableau:getTableauForNewGame(),
-		// 	winMsg:""
-		// }
+    super(props);
 
     this.state = {
-      stock: [cards[51]],
+      stock: this.getStockForNewGame(shuffeledCards),
       waste: [],
-      foundations: {
-        spade: [
-          cards[0],
-          cards[1],
-          cards[2],
-          cards[3],
-          cards[4],
-          cards[5],
-          cards[6],
-          cards[7],
-          cards[8],
-          cards[9],
-          cards[10],
-          cards[11]
-        ],
-        club: [
-          cards[13],
-          cards[14],
-          cards[15],
-          cards[16],
-          cards[17],
-          cards[18],
-          cards[19],
-          cards[20],
-          cards[21],
-          cards[22],
-          cards[23],
-          cards[24]
-        ],
-        diamond: [
-          cards[26],
-          cards[27],
-          cards[28],
-          cards[29],
-          cards[30],
-          cards[31],
-          cards[32],
-          cards[33],
-          cards[34],
-          cards[35],
-          cards[36],
-          cards[37]
-        ],
-        heart: [
-          cards[39],
-          cards[40],
-          cards[41],
-          cards[42],
-          cards[43],
-          cards[44],
-          cards[45],
-          cards[46],
-          cards[47],
-          cards[48],
-          cards[49],
-          cards[50]
-        ]
-      },
-      tableau: [[], [cards[12]], [cards[25]], [], [cards[38]], [], []],
+      foundations: { spade: [], club: [], diamond: [], heart: [] },
+      tableau: this.getTableauForNewGame(shuffeledCards),
       winMsg: ""
     };
+
     this.moveToFoundation = this.moveToFoundation.bind(this);
     this.onStockClicked = this.onStockClicked.bind(this);
     this.refillStock = this.refillStock.bind(this);
@@ -98,6 +37,24 @@ class Game extends React.Component {
       this
     );
     this.moveFromTableauToTableau = this.moveFromTableauToTableau.bind(this);
+  }
+
+  getTableauForNewGame(cards) {
+    let createdTableau = [];
+    let cardIndex = 0;
+    for (let pile = 1; pile < 8; pile++) {
+      let filledPile = [];
+      for (let index = 0; index < pile; index++) {
+        filledPile.push(cards[cardIndex]);
+        cardIndex++;
+      }
+      createdTableau.push(filledPile);
+    }
+    return createdTableau;
+  }
+
+  getStockForNewGame(cards) {
+    return _.takeRight(cards, 24);
   }
 
   refillStock() {
@@ -248,6 +205,9 @@ class Game extends React.Component {
   }
 
   isDropAllowedAtFoundation(card) {
+    if (_.isEmpty(this.state.foundations[card.type])) {
+      return card.number === "1";
+    }
     const lastCard = _.last(this.state.foundations[card.type]);
     return parseInt(lastCard.number) + 1 === parseInt(card.number);
   }
@@ -277,9 +237,19 @@ class Game extends React.Component {
     return piles.every(deck => deck.length === 13);
   }
 
-resetGame(){
-	alert('foo');   //this.startGame ...
-}
+  resetGame() {
+    this.startGame(shuffeledCards);
+  }
+
+  startGame(shuffeledCards) {
+    this.setState({
+      stock: this.getStockForNewGame(shuffeledCards),
+      waste: [],
+      foundations: { spade: [], club: [], diamond: [], heart: [] },
+      tableau: this.getTableauForNewGame(shuffeledCards),
+      winMsg: ""
+    });
+  }
 
   finishGame() {
     this.setState({
@@ -295,7 +265,7 @@ resetGame(){
             />
           </div>
           <div>
-            <button onClick={this.resetGame}>Reset</button>
+            <button onClick={this.resetGame.bind(this)}>Reset</button>
           </div>
         </div>
       )
