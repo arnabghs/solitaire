@@ -313,9 +313,9 @@ function Stock(props) {
 }
 
 function Waste(props) {
-  const topCard = _.last(props.cards);
-  let card = null;
-  if (topCard) {
+  let card = <EmptyCardHolder onDrop={null} />;
+  if (!_.isEmpty(props.cards)) {
+    const topCard = _.last(props.cards);
     topCard.open = true;
     card = <CardDiv card={topCard} from={"waste"} onDrop={null} />;
   }
