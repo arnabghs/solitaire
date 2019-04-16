@@ -24,7 +24,7 @@ section {
   display: flex;
   flex-direction: column;
   justify-content: space-around;
-  background-image: url("/wooden_background.jpg");
+  background-image: url("https://raw.githubusercontent.com/arnabghs/solitaire/gh-pages/wooden_background.jpg");
 }
 header {
   height: 15%;
