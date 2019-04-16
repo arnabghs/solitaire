@@ -16,7 +16,15 @@ const BACKCARD = _.last(cards);
 
 class Game extends React.Component {
   constructor(props) {
-    super(props);
+		super(props);
+		// this.state = {
+		// 	stock:getStockForNewGame(),
+		// 	waste : [],
+		// 	foundations:{spade:[], club:[], diamond:[], heart:[]},
+		// 	tableau:getTableauForNewGame(),
+		// 	winMsg:""
+		// }
+
     this.state = {
       stock: [cards[51]],
       waste: [],
@@ -269,9 +277,28 @@ class Game extends React.Component {
     return piles.every(deck => deck.length === 13);
   }
 
+resetGame(){
+	alert('foo');   //this.startGame ...
+}
+
   finishGame() {
     this.setState({
-      winMsg: <div>Congrats you Won!</div>
+      winMsg: (
+        <div className="win-overlay">
+          <div className="win-msg">Congrats you Won!</div>
+          <div>
+            <img
+              src={"./trophy.gif"}
+              alt="trophy"
+              height="300px"
+              width="400px"
+            />
+          </div>
+          <div>
+            <button onClick={this.resetGame}>Reset</button>
+          </div>
+        </div>
+      )
     });
   }
 
@@ -280,8 +307,9 @@ class Game extends React.Component {
       <section>
         <header />
         <div className={"main"}>
-          <div className={"sidebar"}>{this.state.winMsg}</div>
+          <div className={"sidebar"} />
           <div className="board">
+            {this.state.winMsg}
             <div className={"upper-part"}>
               <Stock cards={this.state.stock} onClick={this.onStockClicked} />
               <Waste cards={this.state.waste} />
