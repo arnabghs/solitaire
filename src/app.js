@@ -275,9 +275,14 @@ class Game extends React.Component {
   render() {
     return (
       <section>
-        <header />
+        <header>
+          <img src="./header_new.gif" alt="heading" />
+        </header>
         <div className={"main"}>
-          <div className={"sidebar"} />
+          <div className={"sidebar"}>
+            {" "}
+            <img src="./side.jpg" height="500px" width="300px" alt="side" />
+          </div>
           <div className="board">
             {this.state.winMsg}
             <div className={"upper-part"}>

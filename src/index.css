@@ -9,8 +9,9 @@
   justify-content: space-around;
 }
 .sidebar {
-  width: 15%;
-  outline: 1px solid #000;
+  width: 19%;
+  display: flex;
+  justify-content: center;
 }
 .board {
   height: 85%;
@@ -23,10 +24,12 @@ section {
   display: flex;
   flex-direction: column;
   justify-content: space-around;
+  background-image: url("/wooden_background.jpg");
 }
 header {
-  height: 7%;
-  outline: 1px solid #000;
+  height: 15%;
+  display: flex;
+  justify-content: center;
 }
 .card,
 .back-card,
@@ -79,7 +82,8 @@ header {
   align-items: center;
 }
 .foundation-box {
-  border: 1px solid #000;
+  border-radius: 10px;
+  background-color: #ffe4c4;
   width: 22%;
   height: 100%;
   display: flex;

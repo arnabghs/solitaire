@@ -15,8 +15,9 @@ solid-black-border(n) {
 }
 
 .sidebar {
-	width: 15%;
-	outline: 1px solid black;
+	width: 19%;
+	display: flex;
+	justify-content: center;
 }
 
 .board {
@@ -31,11 +32,14 @@ section {
 	display: flex;
 	flex-direction: column;
 	justify-content: space-around;
+	background-image: url('/wooden_background.jpg');
 }
 
 header {
-	height: 7%;
-	outline: 1px solid black;
+	height: 15%;
+	display: flex;
+	justify-content: center;
+
 }
 
 .card {
@@ -99,7 +103,9 @@ header {
 }
 
 .foundation-box {
-	solid-black-border(1px);
+	// solid-black-border(1px);
+	border-radius: 10px;
+	background-color: #FFE4C4	;
 	width: 22%;
 	height: 100%;
 	display: flex;
@@ -163,14 +169,14 @@ header {
 	justify-content: space-around;
 	align-items: center;
 	border-radius: 20px;
-	box-shadow: 1px 0px 31px -6px rgba(0,0,0,0.72);
+	box-shadow: 1px 0px 31px -6px rgba(0, 0, 0, 0.72);
 }
 
 button {
 	cursor: pointer;
-	height : 80px;
-	width : 150px;
-	font-size : 40px;
+	height: 80px;
+	width: 150px;
+	font-size: 40px;
 	border-radius: 10px;
 }
 
